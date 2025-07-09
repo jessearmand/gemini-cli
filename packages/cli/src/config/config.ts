@@ -49,6 +49,7 @@ interface CliArgs {
   telemetryOtlpEndpoint: string | undefined;
   telemetryLogPrompts: boolean | undefined;
   'allowed-mcp-server-names': string | undefined;
+  headlessAuth: boolean | undefined;
 }
 
 async function parseArguments(): Promise<CliArgs> {
@@ -127,6 +128,11 @@ async function parseArguments(): Promise<CliArgs> {
     .option('allowed-mcp-server-names', {
       type: 'string',
       description: 'Allowed MCP server names',
+    })
+    .option('headless-auth', {
+      type: 'boolean',
+      description: 'Use headless auth flow to configure GEMINI_XXXX?',
+      default: false,
     })
     .version(await getCliVersion()) // This will enable the --version flag based on package.json
     .alias('v', 'version')
@@ -257,6 +263,7 @@ export async function loadCliConfig(
     bugCommand: settings.bugCommand,
     model: argv.model!,
     extensionContextFilePaths,
+    headlessAuth: argv.headlessAuth,
   });
 }
 

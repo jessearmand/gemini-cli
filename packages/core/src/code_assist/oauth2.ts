@@ -13,6 +13,7 @@ import open from 'open';
 import path from 'node:path';
 import { promises as fs, existsSync, readFileSync } from 'node:fs';
 import * as os from 'os';
+import readline from 'node:readline';
 
 //  OAuth Client ID used to initiate OAuth2Client class.
 const OAUTH_CLIENT_ID =
@@ -53,7 +54,9 @@ export interface OauthWebLogin {
   loginCompletePromise: Promise<void>;
 }
 
-export async function getOauthClient(): Promise<OAuth2Client> {
+export async function getOauthClient(
+  useHeadlessAuth: boolean,
+): Promise<OAuth2Client> {
   const client = new OAuth2Client({
     clientId: OAUTH_CLIENT_ID,
     clientSecret: OAUTH_CLIENT_SECRET,
@@ -82,24 +85,48 @@ export async function getOauthClient(): Promise<OAuth2Client> {
     return client;
   }
 
-  const webLogin = await authWithWeb(client);
+  if (useHeadlessAuth) {
+    for (let i = 0; i < 2; i++) {
+      if (await authWithUserCode(client)) {
+        // Successfully authenticated with user code
+        break;
+      } else {
+        console.error('Failed to authenticate with user code. Retrying...');
+      }
+    }
+  } else {
+    const webLogin = await authWithWeb(client);
 
-  console.log(
-    `\n\nCode Assist login required.\n` +
-      `Attempting to open authentication page in your browser.\n` +
-      `Otherwise navigate to:\n\n${webLogin.authUrl}\n\n`,
-  );
-  await open(webLogin.authUrl);
-  console.log('Waiting for authentication...');
+    console.log(
+      `\n\nCode Assist login required.\n` +
+        `Attempting to open authentication page in your browser.\n` +
+        `Otherwise navigate to:\n\n${webLogin.authUrl}\n\n`,
+    );
+    await open(webLogin.authUrl);
+    console.log('Waiting for authentication...');
 
-  await webLogin.loginCompletePromise;
+    await webLogin.loginCompletePromise;
+  }
 
   return client;
 }
 
-async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
-  const port = await getAvailablePort();
-  const redirectUri = `http://localhost:${port}/oauth2callback`;
+function generateAuthUrl(
+  client: OAuth2Client,
+  redirectUri: string,
+  state: string,
+): string {
+  const authUrl: string = client.generateAuthUrl({
+    redirect_uri: redirectUri,
+    access_type: 'offline',
+    scope: OAUTH_SCOPE,
+    state,
+  });
+  return authUrl;
+}
+
+async function authWithUserCode(client: OAuth2Client): Promise<boolean> {
+  const redirectUri = 'https://codeassist.google.com/authcode';
   const state = crypto.randomBytes(32).toString('hex');
   const authUrl: string = client.generateAuthUrl({
     redirect_uri: redirectUri,
@@ -107,6 +134,39 @@ async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
     scope: OAUTH_SCOPE,
     state,
   });
+  console.error('Please visit the following URL to authorize the application:');
+  console.error('');
+  console.error(authUrl);
+  console.error('');
+
+  const code = await new Promise<string>((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question('Enter the authorization code: ', (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+
+  if (!code) {
+    console.error('Authorization code is required.');
+    return false;
+  } else {
+    console.error(`Received authorization code: "${code}"`);
+  }
+
+  const { tokens } = await client.getToken({ code, redirect_uri: redirectUri });
+  client.setCredentials(tokens);
+  return true;
+}
+
+async function authWithWeb(client: OAuth2Client): Promise<OauthWebLogin> {
+  const port = await getAvailablePort();
+  const redirectUri = `http://localhost:${port}/oauth2callback`;
+  const state = crypto.randomBytes(32).toString('hex');
+  const authUrl = generateAuthUrl(client, redirectUri, state);
 
   const loginCompletePromise = new Promise<void>((resolve, reject) => {
     const server = http.createServer(async (req, res) => {

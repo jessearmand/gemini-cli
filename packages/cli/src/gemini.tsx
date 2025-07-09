@@ -35,6 +35,7 @@ import {
   sessionId,
   logUserPrompt,
   AuthType,
+  getOauthClient,
 } from '@google/gemini-cli-core';
 import { validateAuthMethod } from './config/auth.js';
 import { setMaxSizedBoxDebugging } from './ui/components/shared/MaxSizedBox.js';
@@ -111,6 +112,11 @@ export async function main() {
       'selectedAuthType',
       AuthType.USE_GEMINI,
     );
+  }
+
+  if (config.getHeadlessAuth()) {
+    // Do oauth before app renders to make copying the link possible.
+    const authClient = await getOauthClient(config.getHeadlessAuth());
   }
 
   setMaxSizedBoxDebugging(config.getDebugMode());
