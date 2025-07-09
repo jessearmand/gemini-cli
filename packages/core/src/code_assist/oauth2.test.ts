@@ -131,8 +131,8 @@ describe('oauth2', () => {
       return mockHttpServer as unknown as http.Server;
     });
 
-    const useHeadlessAuth = false;
-    const clientPromise = getOauthClient(useHeadlessAuth);
+    const noBrowser = false;
+    const clientPromise = getOauthClient(noBrowser);
 
     // wait for server to start listening.
     await serverListeningPromise;

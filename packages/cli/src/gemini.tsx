@@ -114,9 +114,9 @@ export async function main() {
     );
   }
 
-  if (config.getHeadlessAuth()) {
+  if (config.getNoBrowser()) {
     // Do oauth before app renders to make copying the link possible.
-    const authClient = await getOauthClient(config.getHeadlessAuth());
+    await getOauthClient(config.getNoBrowser());
   }
 
   setMaxSizedBoxDebugging(config.getDebugMode());

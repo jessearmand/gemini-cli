@@ -101,7 +101,7 @@ export async function createContentGeneratorConfig(
 
 export async function createContentGenerator(
   config: ContentGeneratorConfig,
-  useHeadlessAuth: boolean = false,
+  noBrowser: boolean = false,
   sessionId?: string,
 ): Promise<ContentGenerator> {
   const version = process.env.CLI_VERSION || process.version;
@@ -114,7 +114,7 @@ export async function createContentGenerator(
     return createCodeAssistContentGenerator(
       httpOptions,
       config.authType,
-      useHeadlessAuth,
+      noBrowser,
       sessionId,
     );
   }

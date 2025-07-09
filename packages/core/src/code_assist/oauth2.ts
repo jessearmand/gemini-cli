@@ -55,7 +55,7 @@ export interface OauthWebLogin {
 }
 
 export async function getOauthClient(
-  useHeadlessAuth: boolean,
+  noBrowser: boolean,
 ): Promise<OAuth2Client> {
   const client = new OAuth2Client({
     clientId: OAUTH_CLIENT_ID,
@@ -85,14 +85,20 @@ export async function getOauthClient(
     return client;
   }
 
-  if (useHeadlessAuth) {
-    for (let i = 0; i < 2; i++) {
-      if (await authWithUserCode(client)) {
-        // Successfully authenticated with user code
-        break;
-      } else {
-        console.error('Failed to authenticate with user code. Retrying...');
+  if (noBrowser) {
+    let success = false;
+    const maxRetries = 2;
+    for (let i = 0; !success && i < maxRetries; i++) {
+      success = await authWithUserCode(client);
+      if (!success) {
+        console.error(
+          '\nFailed to authenticate with user code.',
+          i === maxRetries - 1 ? '' : 'Retrying...\n',
+        );
       }
+    }
+    if (!success) {
+      process.exit(1);
     }
   } else {
     const webLogin = await authWithWeb(client);
@@ -157,8 +163,16 @@ async function authWithUserCode(client: OAuth2Client): Promise<boolean> {
     console.error(`Received authorization code: "${code}"`);
   }
 
-  const { tokens } = await client.getToken({ code, redirect_uri: redirectUri });
-  client.setCredentials(tokens);
+  try {
+    const { tokens } = await client.getToken({
+      code,
+      redirect_uri: redirectUri,
+    });
+    client.setCredentials(tokens);
+  } catch (_error) {
+    // Consider logging the error.
+    return false;
+  }
   return true;
 }
 

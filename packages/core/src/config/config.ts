@@ -133,7 +133,7 @@ export interface ConfigParameters {
   bugCommand?: BugCommandSettings;
   model: string;
   extensionContextFilePaths?: string[];
-  headlessAuth?: boolean;
+  noBrowser?: boolean;
 }
 
 export class Config {
@@ -172,7 +172,7 @@ export class Config {
   private readonly bugCommand: BugCommandSettings | undefined;
   private readonly model: string;
   private readonly extensionContextFilePaths: string[];
-  private readonly headlessAuth: boolean;
+  private readonly noBrowser: boolean;
   private modelSwitchedDuringSession: boolean = false;
   flashFallbackHandler?: FlashFallbackHandler;
 
@@ -216,7 +216,7 @@ export class Config {
     this.bugCommand = params.bugCommand;
     this.model = params.model;
     this.extensionContextFilePaths = params.extensionContextFilePaths ?? [];
-    this.headlessAuth = params.headlessAuth ?? false;
+    this.noBrowser = params.noBrowser ?? false;
 
     if (params.contextFileName) {
       setGeminiMdFilename(params.contextFileName);
@@ -451,8 +451,8 @@ export class Config {
     return this.extensionContextFilePaths;
   }
 
-  getHeadlessAuth(): boolean {
-    return this.headlessAuth;
+  getNoBrowser(): boolean {
+    return this.noBrowser;
   }
 
   async getGitService(): Promise<GitService> {

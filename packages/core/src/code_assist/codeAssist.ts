@@ -12,11 +12,11 @@ import { CodeAssistServer, HttpOptions } from './server.js';
 export async function createCodeAssistContentGenerator(
   httpOptions: HttpOptions,
   authType: AuthType,
-  useHeadlessAuth: boolean,
+  noBrowser: boolean,
   sessionId?: string,
 ): Promise<ContentGenerator> {
   if (authType === AuthType.LOGIN_WITH_GOOGLE) {
-    const authClient = await getOauthClient(useHeadlessAuth);
+    const authClient = await getOauthClient(noBrowser);
     const projectId = await setupUser(authClient);
     return new CodeAssistServer(authClient, projectId, httpOptions, sessionId);
   }
