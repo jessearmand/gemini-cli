@@ -125,11 +125,11 @@ Signal: Signal number or \`(none)\` if no signal was received.
 
 export class ToolRegistry {
   private tools: Map<string, Tool> = new Map();
-  private config: Config;
 
-  constructor(config: Config) {
-    this.config = config;
-  }
+  constructor(
+    private readonly config: Config,
+    private readonly debugMode: boolean,
+  ) {}
 
   /**
    * Registers a tool definition.
@@ -164,6 +164,7 @@ export class ToolRegistry {
       this.config.getMcpServers() ?? {},
       this.config.getMcpServerCommand(),
       this,
+      this.debugMode,
     );
   }
 

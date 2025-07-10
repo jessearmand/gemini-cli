@@ -404,7 +404,7 @@ describe('loggers', () => {
         },
       }),
       getQuestion: () => 'test-question',
-      getToolRegistry: () => new ToolRegistry(cfg1),
+      getToolRegistry: () => new ToolRegistry(cfg1, true),
       getFullContext: () => false,
       getUserMemory: () => 'user-memory',
     } as unknown as Config;

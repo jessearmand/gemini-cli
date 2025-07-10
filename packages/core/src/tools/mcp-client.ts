@@ -127,6 +127,7 @@ export async function discoverMcpTools(
   mcpServers: Record<string, MCPServerConfig>,
   mcpServerCommand: string | undefined,
   toolRegistry: ToolRegistry,
+  debugMode: boolean,
 ): Promise<void> {
   // Set discovery state to in progress
   mcpDiscoveryState = MCPDiscoveryState.IN_PROGRESS;
@@ -147,7 +148,12 @@ export async function discoverMcpTools(
 
     const discoveryPromises = Object.entries(mcpServers).map(
       ([mcpServerName, mcpServerConfig]) =>
-        connectAndDiscover(mcpServerName, mcpServerConfig, toolRegistry),
+        connectAndDiscover(
+          mcpServerName,
+          mcpServerConfig,
+          toolRegistry,
+          debugMode,
+        ),
     );
     await Promise.all(discoveryPromises);
 
@@ -174,6 +180,7 @@ async function connectAndDiscover(
   mcpServerName: string,
   mcpServerConfig: MCPServerConfig,
   toolRegistry: ToolRegistry,
+  debugMode: boolean,
 ): Promise<void> {
   // Initialize the server status as connecting
   updateMCPServerStatus(mcpServerName, MCPServerStatus.CONNECTING);
@@ -276,14 +283,34 @@ async function connectAndDiscover(
     updateMCPServerStatus(mcpServerName, MCPServerStatus.DISCONNECTED);
   };
 
+  if (transport instanceof StdioClientTransport && transport.stderr) {
+    // Always drain the stderr stream to avoid back-pressure on the child
+    // process. However, we only surface the output to the user when running
+    // in debug mode so that normal invocations remain quiet.
+    transport.stderr.on('data', (data) => {
+      if (!debugMode) {
+        // Drain but do not log.
+        return;
+      }
+
+      const stderrStr = data.toString();
+      // Filter out verbose INFO logs from some MCP servers
+      if (!stderrStr.includes('] INFO')) {
+        console.debug(`MCP STDERR (${mcpServerName}):`, stderrStr);
+      }
+    });
+  }
+
   try {
     const mcpCallableTool = mcpToTool(mcpClient);
     const tool = await mcpCallableTool.tool();
 
     if (!tool || !Array.isArray(tool.functionDeclarations)) {
-      console.error(
-        `MCP server '${mcpServerName}' did not return valid tool function declarations. Skipping.`,
-      );
+      if (debugMode) {
+        console.error(
+          `MCP server '${mcpServerName}' did not return valid tool function declarations. Skipping.`,
+        );
+      }
       if (
         transport instanceof StdioClientTransport ||
         transport instanceof SSEClientTransport ||
@@ -378,9 +405,11 @@ async function connectAndDiscover(
   // functionality. Connections to servers that did provide tools are kept
   // open, as those tools will require the connection to function.
   if (toolRegistry.getToolsByServer(mcpServerName).length === 0) {
-    console.log(
-      `No tools registered from MCP server '${mcpServerName}'. Closing connection.`,
-    );
+    if (debugMode) {
+      console.log(
+        `No tools registered from MCP server '${mcpServerName}'. Closing connection.`,
+      );
+    }
     if (
       transport instanceof StdioClientTransport ||
       transport instanceof SSEClientTransport ||

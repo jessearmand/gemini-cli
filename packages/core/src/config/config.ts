@@ -521,7 +521,7 @@ export class Config {
   }
 
   async createToolRegistry(): Promise<ToolRegistry> {
-    const registry = new ToolRegistry(this);
+    const registry = new ToolRegistry(this, this.debugMode);
     const targetDir = this.getTargetDir();
 
     // helper to create & register core tools that are enabled

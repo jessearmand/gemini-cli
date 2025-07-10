@@ -141,7 +141,7 @@ describe('ToolRegistry', () => {
 
   beforeEach(() => {
     config = new Config(baseConfigParams);
-    toolRegistry = new ToolRegistry(config);
+    toolRegistry = new ToolRegistry(config, true);
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(console, 'debug').mockImplementation(() => {});
@@ -297,6 +297,7 @@ describe('ToolRegistry', () => {
         mcpServerConfigVal,
         undefined,
         toolRegistry,
+        true,
       );
     });
 
@@ -318,6 +319,7 @@ describe('ToolRegistry', () => {
         mcpServerConfigVal,
         undefined,
         toolRegistry,
+        true,
       );
     });
   });

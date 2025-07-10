@@ -166,6 +166,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
     expect(mockConfig.getMcpServers).toHaveBeenCalledTimes(1);
     expect(mockConfig.getMcpServerCommand).toHaveBeenCalledTimes(1);
@@ -196,6 +197,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(parse).toHaveBeenCalledWith(commandString, process.env);
@@ -243,6 +245,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(StdioClientTransport).toHaveBeenCalledWith({
@@ -282,6 +285,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(SSEClientTransport).toHaveBeenCalledWith(
@@ -388,6 +392,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
@@ -431,6 +436,7 @@ describe('discoverMcpTools', () => {
         mockConfig.getMcpServers() ?? {},
         mockConfig.getMcpServerCommand(),
         mockToolRegistry as any,
+        true,
       );
 
       return { serverConfig };
@@ -542,6 +548,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(mockToolRegistry.registerTool).toHaveBeenCalledTimes(3);
@@ -610,6 +617,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(mockToolRegistry.registerTool).toHaveBeenCalledTimes(1);
@@ -644,6 +652,7 @@ describe('discoverMcpTools', () => {
         mockConfig.getMcpServers() ?? {},
         mockConfig.getMcpServerCommand(),
         mockToolRegistry as any,
+        true,
       ),
     ).rejects.toThrow('Parsing failed');
     expect(mockToolRegistry.registerTool).not.toHaveBeenCalled();
@@ -658,6 +667,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(console.error).toHaveBeenCalledWith(
@@ -683,6 +693,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(console.error).toHaveBeenCalledWith(
@@ -708,6 +719,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     expect(console.error).toHaveBeenCalledWith(
@@ -732,6 +744,7 @@ describe('discoverMcpTools', () => {
       mockConfig.getMcpServers() ?? {},
       mockConfig.getMcpServerCommand(),
       mockToolRegistry as any,
+      true,
     );
 
     const clientInstances = vi.mocked(Client).mock.results;
@@ -782,6 +795,7 @@ describe('discoverMcpTools', () => {
         mockConfig.getMcpServers() ?? {},
         mockConfig.getMcpServerCommand(),
         mockToolRegistry as any,
+        true,
       );
 
       expect(mockToolRegistry.registerTool).toHaveBeenCalledTimes(2);
@@ -809,6 +823,7 @@ describe('discoverMcpTools', () => {
         mockConfig.getMcpServers() ?? {},
         mockConfig.getMcpServerCommand(),
         mockToolRegistry as any,
+        true,
       );
 
       expect(mockToolRegistry.registerTool).toHaveBeenCalledTimes(2);
@@ -835,6 +850,7 @@ describe('discoverMcpTools', () => {
         mockConfig.getMcpServers() ?? {},
         mockConfig.getMcpServerCommand(),
         mockToolRegistry as any,
+        true,
       );
 
       expect(mockToolRegistry.registerTool).toHaveBeenCalledTimes(1);

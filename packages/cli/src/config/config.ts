@@ -259,7 +259,7 @@ export async function loadCliConfig(
     extensionContextFilePaths,
   );
 
-  let mcpServers = mergeMcpServers(settings, activeExtensions);
+  let mcpServers = mergeMcpServers(settings, activeExtensions, debugMode);
   const excludeTools = mergeExcludeTools(settings, activeExtensions);
 
   if (argv.allowedMcpServerNames) {
@@ -336,15 +336,21 @@ export async function loadCliConfig(
   });
 }
 
-function mergeMcpServers(settings: Settings, extensions: Extension[]) {
+function mergeMcpServers(
+  settings: Settings,
+  extensions: Extension[],
+  debugMode: boolean,
+) {
   const mcpServers = { ...(settings.mcpServers || {}) };
   for (const extension of extensions) {
     Object.entries(extension.config.mcpServers || {}).forEach(
       ([key, server]) => {
         if (mcpServers[key]) {
-          logger.warn(
-            `Skipping extension MCP config for server with key "${key}" as it already exists.`,
-          );
+          if (debugMode) {
+            logger.debug(
+              `Skipping extension MCP config for server with key "${key}" as it already exists.`,
+            );
+          }
           return;
         }
         mcpServers[key] = server;
